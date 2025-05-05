@@ -2,12 +2,12 @@ import {usersTable, courseTable, cartTable} from "./schema.js";
 import {eq} from "drizzle-orm";
 
 export async function createUser(db: any, name: string, email: string, phone: number, address: string) {
-    return await db.insert(usersTable).values({
+    await db.insert(usersTable).values({
       name,
       email,
       phone,
       address
-    }).returning();
+    })
   }
 
 export async function getUsers(db: any) {
@@ -15,9 +15,10 @@ export async function getUsers(db: any) {
     return users;
 }
 
-export async function getUser(db: any, id: number) {
-    const user = await db.select().from(usersTable).where(eq(usersTable.id, id));
-    return user;
+export async function getUserByEmail(db, email) {
+  const users = await db.select().from(usersTable).where(eq(usersTable.email, email)
+  )
+  return users[0]
 }
 
 export async function deleteUser(db: any, id: number) {
@@ -26,10 +27,9 @@ export async function deleteUser(db: any, id: number) {
 }
 
 export async function updateUser(db: any, id: number) {
-    const user = await db.update(usersTable)
-    .set({isAdmin: 1})
-    .where(eq(usersTable.id, id));
-    return user;
+  return await db.update(usersTable)
+      .set({ isAdmin: 1 })
+      .where(eq(usersTable.id, id));
 }
 
 export async function insertCart(
@@ -57,13 +57,14 @@ export async function insertCart(
     return await db.delete(cartTable).where(eq(cartTable.id, id));
   }
 
-  export async function updateCart(db: any, id: number, status: string) {
-    return await db.update(cartTable)
-      .set({ status })
-      .where(eq(cartTable.id, id));
-  }
-
   export async function getCourses(db: any) {
     const result = await db.select().from(courseTable);
     return result;
   }
+
+  // export async function editCourse(db: any, id:number, price:number) {
+  //   const result = await db.update(courseTable)
+  //   .set({ price })
+  //   .where(eq(courseTable.id, id));;
+  //   return result;
+  // }

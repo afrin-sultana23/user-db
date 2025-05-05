@@ -10,8 +10,9 @@ app.use(express.json());
 
 
 import { drizzle } from 'drizzle-orm/libsql';
-import {createUser, deleteUser, getUser, getUsers, updateUser,getCourses,
-    insertCart,getCart,deleteCart,updateCart
+import {createUser, deleteUser, getUsers, updateUser,getCourses,
+    insertCart,getCart,deleteCart,
+    getUserByEmail,
 } from "./db/crud.js";
 
 
@@ -19,7 +20,7 @@ console.log(process.env.DB_FILE_NAME!)
 
 const db = drizzle(process.env.DB_FILE_NAME!);
 
-//console.log(await getUsers(db));
+console.log(await getUsers(db));
 //console.log(await getCourses(db));
 //console.log(await getCart(db,email));
 
@@ -58,32 +59,51 @@ app.post("/cart", async (req, res) => {
     
   });
 
-
-app.get('/users/:id', async (req, res) => {
-    let user = await getUser(db, Number(req.params.id));
-    res.send(user)
-})
-
 app.post('/users', async (req, res) => {
-    const { name, email, photoURL, phone, address } = req.body;
-    const existingUser = await getUser( db, email );
-    if (existingUser) {
-        return res.status(409).send({ message: 'User already exists' });
-    }
+    const { name, email, phone, address } = req.body;
     const newUser = await createUser(db, name, email, phone, address);
+    console.log(newUser)
     res.send(newUser);
 })
 
+// Example in Express.js or similar
+app.get('/users/:email', async (req, res) => {
+    const email = req.params.email;
+    console.log("Checking admin for:", email);
+
+    const user = await getUserByEmail(db, email);
+    console.log(user)
+    res.send({ isAdmin: user?.isAdmin === 1 });
+});
+
+
 //delete
-app.delete('/users/:id', async (req, res) => {
-    await deleteUser(db, Number(req.params.id));
-    res.send("User deleted")
-})
+app.delete("/users/:id", async (req, res) => {
+
+    const id = Number(req.params.id);
+    const result = await deleteUser(db, id);
+    res.json({ success: true, result });
+    
+  });
+
 app.patch('/users/:id', async (req,res) => {
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
     const result = await updateUser(db, id);
-    res.send(result)
+    res.json({ success: true, result })
 })
+
+// app.patch("/courses/:id", async (req, res) => {
+//     const { id } = req.params;
+//     const { price } = req.body;
+//     console.log(price)
+//     const result = await editCourse(db, parseInt(id), parseFloat(price))
+//     res.json({ success: true, result });
+   
+//         console.log(result);
+      
+    
+// });
+
 
 app.listen(port, () => {
     console.log(`userdb app listening on port ${port}`)

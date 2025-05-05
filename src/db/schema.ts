@@ -1,13 +1,13 @@
 ;
 import { int, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-export const usersTable = sqliteTable("users_table", {
+export const usersTable = sqliteTable("usersTable", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull(),
-  email: text().notNull().unique(),
+  email: text().notNull(),
   phone: int(),
   address: text(),
-  isAdmin: int()
+  isAdmin: int().default(0)
 });
 
 export const courseTable = sqliteTable('courses', {
